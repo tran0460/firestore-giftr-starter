@@ -36,16 +36,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 	document
 		.getElementById("btnCancelIdea")
 		.addEventListener("click", hideOverlay);
-	document.querySelector(".overlay").addEventListener("click", hideOverlay);
+	document
+		.querySelector(".invisible-bg")
+		.addEventListener("click", hideOverlay);
 	document
 		.getElementById("btnAddPerson")
 		.addEventListener("click", showOverlay);
 	document.getElementById("btnAddIdea").addEventListener("click", showOverlay);
+	document
+		.getElementById("btnSavePerson")
+		.addEventListener("click", handleSavePerson);
+	// Initial setup
+	document.getElementById("dlgPerson").className = "";
 	getPeople();
 });
 
 // Functions
-// UI
+// UI related
 function hideOverlay(ev) {
 	ev.preventDefault();
 	document.querySelector(".overlay").classList.remove("active");
@@ -68,16 +75,20 @@ const displayPeople = (data) => {
 	const listContainer = document.querySelector(".person-list");
 	listContainer.innerHTML = data.map((doc) => {
 		let dob = new Date();
-		dob.setMonth(doc.birthMonth);
+		dob.setMonth(doc["birth-month"]);
+		dob.setDate(doc["birth-day"]);
 		return `
 		<li data-id="${doc.id}" class="person">
             <p class="name">${doc.name}</p>
-            <p class="dob">${dob.toDateString().substring(4, 10)}</p>
+            <p class="dob">${dob.toDateString().substring(4, 10)}
+				</p>
         </li>
 		`;
 	});
 };
-// Data
+// Button Handlers
+const handleSavePerson = () => {};
+// Firebase related
 const getPeople = () => {
 	people = [];
 	const q = query(collection(db, "people"));
