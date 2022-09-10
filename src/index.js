@@ -1,5 +1,11 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, doc } from "firebase/firestore";
+import {
+	getFirestore,
+	collection,
+	doc,
+	getDocs,
+	query,
+} from "firebase/firestore";
 
 // Your web app's Firebase configuration
 
@@ -30,8 +36,13 @@ document.addEventListener("DOMContentLoaded", () => {
 		.getElementById("btnAddPerson")
 		.addEventListener("click", showOverlay);
 	document.getElementById("btnAddIdea").addEventListener("click", showOverlay);
+	getPeople();
 });
+// Variables
+let people = [];
+let currentPerson = {};
 
+// Functions
 function hideOverlay(ev) {
 	ev.preventDefault();
 	document.querySelector(".overlay").classList.remove("active");
@@ -46,3 +57,14 @@ function showOverlay(ev) {
 	//TODO: check that person is selected before adding an idea
 	document.getElementById(id).classList.add("active");
 }
+
+const getPeople = () => {
+	people = [];
+	const q = query(collection(db, "people"));
+	getDocs(q).then((snap) => {
+		snap.forEach((doc) => {
+			const data = doc.data();
+			people.push(data);
+		});
+	});
+};
