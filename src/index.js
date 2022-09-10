@@ -24,7 +24,11 @@ const app = initializeApp(firebaseConfig);
 // get a reference to the database
 const db = getFirestore(app);
 
-document.addEventListener("DOMContentLoaded", () => {
+// Variables
+let people = [];
+let currentPerson = {};
+
+document.addEventListener("DOMContentLoaded", async () => {
 	//set up the dom events
 	document
 		.getElementById("btnCancelPerson")
@@ -39,11 +43,9 @@ document.addEventListener("DOMContentLoaded", () => {
 	document.getElementById("btnAddIdea").addEventListener("click", showOverlay);
 	getPeople();
 });
-// Variables
-let people = [];
-let currentPerson = {};
 
 // Functions
+// UI
 function hideOverlay(ev) {
 	ev.preventDefault();
 	document.querySelector(".overlay").classList.remove("active");
@@ -59,15 +61,37 @@ function showOverlay(ev) {
 	document.getElementById(id).classList.add("active");
 }
 
+/**
+ * Takes the people data and set the innerHTML of the list container for each person
+ */
+const displayPeople = (data) => {
+	const listContainer = document.querySelector(".person-list");
+	listContainer.innerHTML = data.map((doc) => {
+		return `
+		<li data-id="${doc.id}" class="person">
+            <p class="name">${doc.name}</p>
+            <p class="dob">${doc.birthMonth} ${doc.birthDay}</p>
+        </li>
+		`;
+	});
+};
+// Data
 const getPeople = () => {
 	people = [];
 	const q = query(collection(db, "people"));
-	getDocs(q).then((snap) => {
-		snap.forEach((doc) => {
-			const data = doc.data();
-			people.push(data);
+	getDocs(q)
+		.then((snap) => {
+			snap.forEach((doc) => {
+				const data = doc.data();
+				people.push({
+					...data,
+					id: doc.id,
+				});
+			});
+		})
+		.then(() => {
+			displayPeople(people);
 		});
-	});
 };
 
 const addPerson = (person) => {
