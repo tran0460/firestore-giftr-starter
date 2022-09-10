@@ -47,7 +47,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		.getElementById("btnSavePerson")
 		.addEventListener("click", handleSavePerson);
 	// Initial setup
-	document.getElementById("dlgPerson").className = "";
+	document
+		.querySelector(".person-list")
+		.addEventListener("click", (ev) => console.log(ev.target));
 	getPeople();
 });
 
@@ -87,7 +89,16 @@ const displayPeople = (data) => {
 	});
 };
 // Button Handlers
-const handleSavePerson = () => {};
+const handleSavePerson = () => {
+	let nameInput = document.getElementById("name").value;
+	let birthMonthInput = document.getElementById("month").value;
+	let birthDayInput = document.getElementById("day").value;
+	addPerson({
+		name: nameInput,
+		"birth-day": parseInt(birthMonthInput),
+		"birth-day-month": parseInt(birthDayInput),
+	});
+};
 // Firebase related
 const getPeople = () => {
 	people = [];
@@ -109,7 +120,9 @@ const getPeople = () => {
 
 const addPerson = (person) => {
 	const ref = collection(db, "people");
-	addDoc(ref, person).then(() => {
-		console.log(`added ${person.name}`);
-	});
+	addDoc(ref, person)
+		.then(() => {
+			console.log(`added ${person.name}`);
+		})
+		.catch((err) => console.log(err));
 };
