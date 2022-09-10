@@ -67,10 +67,12 @@ function showOverlay(ev) {
 const displayPeople = (data) => {
 	const listContainer = document.querySelector(".person-list");
 	listContainer.innerHTML = data.map((doc) => {
+		let dob = new Date();
+		dob.setMonth(doc.birthMonth);
 		return `
 		<li data-id="${doc.id}" class="person">
             <p class="name">${doc.name}</p>
-            <p class="dob">${doc.birthMonth} ${doc.birthDay}</p>
+            <p class="dob">${dob.toDateString().substring(4, 10)}</p>
         </li>
 		`;
 	});
@@ -97,6 +99,6 @@ const getPeople = () => {
 const addPerson = (person) => {
 	const ref = collection(db, "people");
 	addDoc(ref, person).then(() => {
-		console.log("done");
+		console.log(`added ${person.name}`);
 	});
 };
