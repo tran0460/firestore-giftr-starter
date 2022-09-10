@@ -5,6 +5,7 @@ import {
 	doc,
 	getDocs,
 	query,
+	addDoc,
 } from "firebase/firestore";
 
 // Your web app's Firebase configuration
@@ -66,5 +67,12 @@ const getPeople = () => {
 			const data = doc.data();
 			people.push(data);
 		});
+	});
+};
+
+const addPerson = (person) => {
+	const ref = collection(db, "people");
+	addDoc(ref, person).then(() => {
+		console.log("done");
 	});
 };
