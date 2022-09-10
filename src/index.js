@@ -8,8 +8,7 @@ import {
 	addDoc,
 } from "firebase/firestore";
 
-// Your web app's Firebase configuration
-
+/* FIREBASE CONFIGS */
 const firebaseConfig = {
 	apiKey: "AIzaSyC0XzZoj3FAdhB8Op0ZvpBVP86x3xnFKqQ",
 	authDomain: "fire-giftr-b6e2b.firebaseapp.com",
@@ -24,11 +23,14 @@ const app = initializeApp(firebaseConfig);
 // get a reference to the database
 const db = getFirestore(app);
 
-// Variables
+/* VARIABLES */
 let people = [];
 let currentPerson = {};
 
-document.addEventListener("DOMContentLoaded", async () => {
+/* LISTENERS */
+document.addEventListener("DOMContentLoaded", async (ev) => {
+	// Prevent overlay from appearing
+	hideOverlay(ev);
 	//set up the dom events
 	document
 		.getElementById("btnCancelPerson")
@@ -47,13 +49,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 		.getElementById("btnSavePerson")
 		.addEventListener("click", handleSavePerson);
 	// Initial setup
-	document
-		.querySelector(".person-list")
-		.addEventListener("click", (ev) => console.log(ev.target));
+	document.querySelector(".person-list").addEventListener("click", (ev) => {});
 	getPeople();
 });
 
-// Functions
+/*********FUNCTIONS*********/
 // UI related
 function hideOverlay(ev) {
 	ev.preventDefault();
@@ -70,9 +70,7 @@ function showOverlay(ev) {
 	document.getElementById(id).classList.add("active");
 }
 
-/**
- * Takes the people data and set the innerHTML of the list container for each person
- */
+// Takes the people data and set the innerHTML of the list container for each person
 const displayPeople = (data) => {
 	const listContainer = document.querySelector(".person-list");
 	listContainer.innerHTML = data.map((doc) => {
@@ -89,17 +87,18 @@ const displayPeople = (data) => {
 	});
 };
 // Button Handlers
-const handleSavePerson = () => {
+const handleSavePerson = (ev) => {
 	let nameInput = document.getElementById("name").value;
 	let birthMonthInput = document.getElementById("month").value;
 	let birthDayInput = document.getElementById("day").value;
 	addPerson({
 		name: nameInput,
 		"birth-day": parseInt(birthMonthInput),
-		"birth-day-month": parseInt(birthDayInput),
+		"birth-month": parseInt(birthDayInput),
 	});
+	hideOverlay(ev);
 };
-// Firebase related
+// Get all docs in the people collection
 const getPeople = () => {
 	people = [];
 	const q = query(collection(db, "people"));
@@ -117,12 +116,12 @@ const getPeople = () => {
 			displayPeople(people);
 		});
 };
-
+// Create a new document in the people collection with the data from the param
 const addPerson = (person) => {
 	const ref = collection(db, "people");
 	addDoc(ref, person)
 		.then(() => {
-			console.log(`added ${person.name}`);
+			getPeople();
 		})
 		.catch((err) => console.log(err));
 };
