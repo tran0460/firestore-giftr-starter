@@ -26,7 +26,7 @@ const db = getFirestore(app);
 /* VARIABLES */
 let people = [];
 let gifts = [];
-let currentPerson = {};
+let currentPerson;
 
 /* LISTENERS */
 document.addEventListener("DOMContentLoaded", async (ev) => {
@@ -64,9 +64,10 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
 		currentPerson = people.find(
 			(person) => person.id === ev.target.getAttribute("data-id")
 		);
+		displayGifts(gifts);
 	});
-	console.log(doc(db, "people", "R3SBR6p5tfBUH9fqi6oK"));
 	getPeople();
+	getGifts();
 });
 
 /*********FUNCTIONS*********/
@@ -99,6 +100,21 @@ const displayPeople = (data) => {
 				</p>
         </li>
 		`;
+	});
+};
+const displayGifts = (data) => {
+	if (!currentPerson) return;
+	const listContainer = document.querySelector(".idea-list");
+	listContainer.innerHTML = data.map((doc) => {
+		if (doc.reference.id !== currentPerson.id) return;
+		return `<li class="idea" data-id="${doc.id}">
+		<label for="${doc.id}">
+			<input type="checkbox" id="${doc.id}" />
+			Bought
+		</label>
+		<p class="title">${doc.idea}</p>
+		<p class="location">${doc.location}</p>
+	</li> `;
 	});
 };
 // Button Handlers
@@ -154,7 +170,7 @@ const getGifts = () => {
 			});
 		})
 		.then(() => {
-			displayPeople(people);
+			displayGifts(gifts);
 		});
 };
 // Create a new document in the people collection with the given object
