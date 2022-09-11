@@ -48,6 +48,9 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
 	document
 		.getElementById("btnSavePerson")
 		.addEventListener("click", handleSavePerson);
+	document
+		.getElementById("btnSaveIdea")
+		.addEventListener("click", handleSaveIdea);
 	// Initial setup
 	document.querySelector(".person-list").addEventListener("click", (ev) => {
 		// If user accidentally clicks on ul, do nothing
@@ -61,6 +64,7 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
 			(person) => person.id === ev.target.getAttribute("data-id")
 		);
 	});
+	console.log(doc(db, "people", "R3SBR6p5tfBUH9fqi6oK"));
 	getPeople();
 });
 
@@ -105,6 +109,17 @@ const handleSavePerson = (ev) => {
 		name: nameInput,
 		"birth-day": parseInt(birthMonthInput),
 		"birth-month": parseInt(birthDayInput),
+	});
+	hideOverlay(ev);
+};
+
+const handleSaveIdea = (ev) => {
+	let titleInput = document.getElementById("title").value;
+	let locationInput = document.getElementById("location").value;
+	addIdea({
+		idea: titleInput,
+		location: locationInput,
+		reference: doc(db, "people", currentPerson.id),
 	});
 	hideOverlay(ev);
 };
