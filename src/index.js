@@ -265,6 +265,12 @@ const editPerson = (id, newValues) => {
 	updateDoc(ref, newValues).catch((err) => console.warn(err));
 };
 
+// Delete the document with the given id from firestore
+const deletePerson = (id) => {
+	let ref = doc(db, "people", `${id}`);
+	deleteDoc(ref).catch((err) => console.warn(err));
+};
+
 // Create a new gift for the person with the given object
 const addIdea = (giftIdea) => {
 	const ref = collection(db, "gift-ideas");
