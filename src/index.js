@@ -6,6 +6,7 @@ import {
 	addDoc,
 	onSnapshot,
 	updateDoc,
+	deleteDoc,
 } from "firebase/firestore";
 
 /* FIREBASE CONFIGS */
@@ -129,17 +130,20 @@ const displayGifts = (data) => {
 				});
 				break;
 			case "button":
+				currentGift = gifts.find(
+					(gift) => gift.id === e.target.parentElement.getAttribute("data-id")
+				);
 				if (e.target.className === "edit-idea") {
 					giftOverlayMode = "edit";
 					// find the data for the item the user has clicked
-					currentGift = gifts.find(
-						(gift) => gift.id === e.target.parentElement.getAttribute("data-id")
-					);
 					// set the form values
 					document.getElementById("title").value = currentGift.idea;
 					document.getElementById("location").value = currentGift.location;
 					// toggle overlay
 					showOverlay(e);
+				}
+				if (e.target.className === "delete-idea") {
+					deleteIdea(currentGift.id);
 				}
 				break;
 		}
@@ -273,4 +277,10 @@ const addIdea = (giftIdea) => {
 const editIdea = (id, newValues) => {
 	const ref = doc(db, "gift-ideas", `${id}`);
 	updateDoc(ref, newValues).catch((err) => console.warn(err));
+};
+
+// Delete the document with the given id from firestore
+const deleteIdea = (id) => {
+	let ref = doc(db, "gift-ideas", `${id}`);
+	deleteDoc(ref).catch((err) => console.warn(err));
 };
