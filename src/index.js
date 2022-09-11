@@ -113,7 +113,10 @@ const displayGifts = (data) => {
 	if (!currentPerson) return;
 	const listContainer = document.querySelector(".idea-list");
 	listContainer.addEventListener("click", (e) => {
-		if (e.target.localName === "input") console.log("input clicked");
+		if (e.target.localName === "input")
+			editIdea(e.target.parentElement.parentElement.getAttribute("data-id"), {
+				bought: e.target.checked,
+			});
 	});
 	listContainer.innerHTML = data.map((doc) => {
 		if (doc.reference.id !== currentPerson.id) return;
@@ -184,7 +187,7 @@ const createGiftsListener = () => {
 			gifts = [];
 			snapshot.docs.forEach((doc) => {
 				let data = doc.data();
-				gifts.push(data);
+				gifts.push({ ...data, id: doc.id });
 			});
 			displayGifts(gifts);
 		}
@@ -206,4 +209,9 @@ const addIdea = (giftIdea) => {
 	addDoc(ref, giftIdea)
 		.then(() => {})
 		.catch((err) => console.warn(err));
+};
+
+const editIdea = (id, newValues) => {
+	const ref = doc(db, "gift-ideas", `${id}`);
+	updateDoc(ref, newValues).catch((err) => console.warn(err));
 };
