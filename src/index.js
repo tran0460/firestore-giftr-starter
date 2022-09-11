@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
 		);
 		displayGifts(gifts);
 	});
-	getPeople();
+	getPeople({ selectFirstPerson: true });
 	getGifts();
 });
 
@@ -85,6 +85,12 @@ function showOverlay(ev) {
 	const id = ev.target.id === "btnAddPerson" ? "dlgPerson" : "dlgIdea";
 	document.getElementById(id).classList.add("active");
 }
+
+const selectFirstPerson = () => {
+	if (people.length === 0) return;
+	document.querySelector(".person").className = "person selected";
+	currentPerson = people[0];
+};
 
 // Takes the people data and set the innerHTML of the list container for each person
 const displayPeople = (data) => {
@@ -141,7 +147,7 @@ const handleSaveIdea = (ev) => {
 	hideOverlay(ev);
 };
 // Get all docs in the people collection
-const getPeople = () => {
+const getPeople = (options) => {
 	people = [];
 	const q = query(collection(db, "people"));
 	getDocs(q)
@@ -156,6 +162,9 @@ const getPeople = () => {
 		})
 		.then(() => {
 			displayPeople(people);
+		})
+		.then(() => {
+			if (options.selectFirstPerson) selectFirstPerson();
 		});
 };
 // Get all docs in the gifts collection
