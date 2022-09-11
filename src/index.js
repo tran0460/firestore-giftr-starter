@@ -3,10 +3,9 @@ import {
 	getFirestore,
 	collection,
 	doc,
-	getDocs,
-	query,
 	addDoc,
 	onSnapshot,
+	updateDoc,
 } from "firebase/firestore";
 
 /* FIREBASE CONFIGS */
@@ -109,16 +108,20 @@ const displayPeople = (data) => {
 		`;
 	});
 };
-
 // Takes the people data and set the innerHTML of the list container for each gift
 const displayGifts = (data) => {
 	if (!currentPerson) return;
 	const listContainer = document.querySelector(".idea-list");
+	listContainer.addEventListener("click", (e) => {
+		if (e.target.localName === "input") console.log("input clicked");
+	});
 	listContainer.innerHTML = data.map((doc) => {
 		if (doc.reference.id !== currentPerson.id) return;
 		return `<li class="idea" data-id="${doc.id}">
 		<label for="${doc.id}">
-			<input type="checkbox" id="${doc.id}" />
+			<input type="checkbox" class="gift-status" id="${doc.id}" ${
+			doc.bought === true ? "checked" : "unchecked"
+		}/>
 			Bought
 		</label>
 		<p class="title">${doc.idea}</p>
@@ -153,12 +156,12 @@ const handleSaveIdea = (ev) => {
 };
 // Listen to the people collection
 const createPeopleListener = (options) => {
-	people = [];
 	const ref = collection(db, "people");
 	let cleanup = onSnapshot(
 		ref,
 		{ includeMetadataChanges: true },
 		async (snapshot) => {
+			people = [];
 			snapshot.docs.forEach((doc) => {
 				let data = doc.data();
 				people.push({
@@ -173,12 +176,12 @@ const createPeopleListener = (options) => {
 };
 // Listen to gifts collection
 const createGiftsListener = () => {
-	gifts = [];
 	const ref = collection(db, "gift-ideas");
 	let cleanup = onSnapshot(
 		ref,
 		{ includeMetadataChanges: true },
 		async (snapshot) => {
+			gifts = [];
 			snapshot.docs.forEach((doc) => {
 				let data = doc.data();
 				gifts.push(data);
