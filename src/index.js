@@ -25,6 +25,7 @@ const db = getFirestore(app);
 
 /* VARIABLES */
 let people = [];
+let gifts = [];
 let currentPerson = {};
 
 /* LISTENERS */
@@ -135,6 +136,21 @@ const getPeople = () => {
 					...data,
 					id: doc.id,
 				});
+			});
+		})
+		.then(() => {
+			displayPeople(people);
+		});
+};
+// Get all docs in the gifts collection
+const getGifts = () => {
+	gifts = [];
+	const q = query(collection(db, "gift-ideas"));
+	getDocs(q)
+		.then((snap) => {
+			snap.forEach((doc) => {
+				const data = doc.data();
+				gifts.push(data);
 			});
 		})
 		.then(() => {
