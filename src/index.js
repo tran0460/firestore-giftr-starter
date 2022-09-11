@@ -221,7 +221,7 @@ const handleSaveIdea = (ev) => {
 		addIdea({
 			idea: titleInput,
 			location: locationInput,
-			reference: doc(db, "people", currentPerson.id),
+			"person-id": doc(db, "people", currentPerson.id),
 			bought: false,
 		});
 	}
