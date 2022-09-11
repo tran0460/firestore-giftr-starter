@@ -56,6 +56,10 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
 		if (document.querySelector("li.selected"))
 			document.querySelector("li.selected").className = "person";
 		ev.target.className = "person selected";
+		// Set current person variable to currently selected person
+		currentPerson = people.find(
+			(person) => person.id === ev.target.getAttribute("data-id")
+		);
 	});
 	getPeople();
 });
@@ -122,7 +126,7 @@ const getPeople = () => {
 			displayPeople(people);
 		});
 };
-// Create a new document in the people collection with the data from the param
+// Create a new document in the people collection with the given object
 const addPerson = (person) => {
 	const ref = collection(db, "people");
 	addDoc(ref, person)
@@ -130,4 +134,12 @@ const addPerson = (person) => {
 			getPeople();
 		})
 		.catch((err) => console.log(err));
+};
+
+// Create a new gift for the person with the given object
+const addIdea = (giftIdea) => {
+	const ref = collection(db, "gift-ideas");
+	addDoc(ref, giftIdea)
+		.then(() => {})
+		.catch((err) => console.warn(err));
 };
