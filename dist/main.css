@@ -80,7 +80,7 @@ ul {
 	cursor: pointer;
 	z-index: 3;
 }
-.person-list li > * {
+.person-list li > *:not(button) {
 	pointer-events: none;
 }
 .person-list li.selected {
