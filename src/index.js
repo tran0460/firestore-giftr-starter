@@ -6,6 +6,7 @@ import {
 	getDocs,
 	query,
 	addDoc,
+	onSnapshot,
 } from "firebase/firestore";
 
 /* FIREBASE CONFIGS */
@@ -66,8 +67,8 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
 		);
 		displayGifts(gifts);
 	});
-	getPeople({ selectFirstPerson: true });
-	getGifts();
+	createPeopleListener({ selectFirstPerson: true });
+	createGiftsListener();
 });
 
 /*********FUNCTIONS*********/
@@ -108,6 +109,8 @@ const displayPeople = (data) => {
 		`;
 	});
 };
+
+// Takes the people data and set the innerHTML of the list container for each gift
 const displayGifts = (data) => {
 	if (!currentPerson) return;
 	const listContainer = document.querySelector(".idea-list");
@@ -124,6 +127,7 @@ const displayGifts = (data) => {
 	});
 };
 // Button Handlers
+// Saves the form value and create a person document from them
 const handleSavePerson = (ev) => {
 	let nameInput = document.getElementById("name").value;
 	let birthMonthInput = document.getElementById("month").value;
@@ -135,7 +139,7 @@ const handleSavePerson = (ev) => {
 	});
 	hideOverlay(ev);
 };
-
+// Saves the form value and create a gift document from them
 const handleSaveIdea = (ev) => {
 	let titleInput = document.getElementById("title").value;
 	let locationInput = document.getElementById("location").value;
@@ -143,51 +147,52 @@ const handleSaveIdea = (ev) => {
 		idea: titleInput,
 		location: locationInput,
 		reference: doc(db, "people", currentPerson.id),
+		bought: false,
 	});
 	hideOverlay(ev);
 };
-// Get all docs in the people collection
-const getPeople = (options) => {
+// Listen to the people collection
+const createPeopleListener = (options) => {
 	people = [];
-	const q = query(collection(db, "people"));
-	getDocs(q)
-		.then((snap) => {
-			snap.forEach((doc) => {
-				const data = doc.data();
+	const ref = collection(db, "people");
+	let cleanup = onSnapshot(
+		ref,
+		{ includeMetadataChanges: true },
+		async (snapshot) => {
+			snapshot.docs.forEach((doc) => {
+				let data = doc.data();
 				people.push({
 					...data,
 					id: doc.id,
 				});
 			});
-		})
-		.then(() => {
-			displayPeople(people);
-		})
-		.then(() => {
+			await displayPeople(people);
 			if (options.selectFirstPerson) selectFirstPerson();
-		});
+		}
+	);
 };
-// Get all docs in the gifts collection
-const getGifts = () => {
+// Listen to gifts collection
+const createGiftsListener = () => {
 	gifts = [];
-	const q = query(collection(db, "gift-ideas"));
-	getDocs(q)
-		.then((snap) => {
-			snap.forEach((doc) => {
-				const data = doc.data();
+	const ref = collection(db, "gift-ideas");
+	let cleanup = onSnapshot(
+		ref,
+		{ includeMetadataChanges: true },
+		async (snapshot) => {
+			snapshot.docs.forEach((doc) => {
+				let data = doc.data();
 				gifts.push(data);
 			});
-		})
-		.then(() => {
 			displayGifts(gifts);
-		});
+		}
+	);
 };
 // Create a new document in the people collection with the given object
 const addPerson = (person) => {
 	const ref = collection(db, "people");
 	addDoc(ref, person)
 		.then(() => {
-			getPeople();
+			createPeopleListener();
 		})
 		.catch((err) => console.log(err));
 };
