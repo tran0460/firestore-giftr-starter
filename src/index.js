@@ -63,15 +63,9 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
 	// Initial setup
 	document.querySelector(".person-list").addEventListener("click", (ev) => {
 		// If user accidentally clicks on ul, do nothing
-		if (ev.target.localName === "ul") return;
-		// If theres another active list item, make it not active anymore
-		if (document.querySelector("li.selected"))
-			document.querySelector("li.selected").className = "person";
-		ev.target.className = "person selected";
-		// Set current person variable to currently selected person
-		currentPerson = people.find(
-			(person) => person.id === ev.target.getAttribute("data-id")
-		);
+		if (ev.target.localName === "ul" || ev.target.localName === "button")
+			return;
+		selectPerson(ev.target);
 		displayGifts(gifts);
 	});
 	createPeopleListener({ selectFirstPerson: true });
@@ -94,6 +88,17 @@ function showOverlay(ev) {
 	document.getElementById(id).classList.add("active");
 }
 
+const selectPerson = (target) => {
+	// If theres another active list item, make it not active anymore
+	if (document.querySelector("li.selected"))
+		document.querySelector("li.selected").className = "person";
+	target.className = "person selected";
+	// Set current person variable to currently selected person
+	currentPerson = people.find(
+		(person) => person.id === target.getAttribute("data-id")
+	);
+};
+
 const selectFirstPerson = () => {
 	if (people.length === 0) return;
 	document.querySelector(".person").className = "person selected";
@@ -103,9 +108,27 @@ const selectFirstPerson = () => {
 // Takes the people data and set the innerHTML of the list container for each person
 const displayPeople = (data) => {
 	const listContainer = document.querySelector(".person-list");
+	listContainer.addEventListener("click", (e) => {
+		if (e.target.localName != "button") return;
+		if (e.target.className === "edit-person") {
+			selectPerson(e.target.parentElement);
+			personOverlayMode = "edit";
+			// set the form values
+			document.getElementById("name").value = currentPerson.name;
+			document.getElementById("month").value = currentPerson["birth-month"];
+			document.getElementById("day").value = currentPerson["birth-day"];
+			// toggle overlay
+			e.target.id = "btnAddPerson";
+			showOverlay(e);
+		}
+		if (e.target.className === "delete-person") {
+			selectPerson(e.target.parentElement);
+			deletePerson(currentPerson.id);
+		}
+	});
 	listContainer.innerHTML = data.map((doc) => {
 		let dob = new Date();
-		dob.setMonth(doc["birth-month"]);
+		dob.setMonth(doc["birth-month"] - 1);
 		dob.setDate(doc["birth-day"]);
 		return `
 		<li data-id="${doc.id}" class="person">
@@ -170,18 +193,18 @@ const handleSavePerson = (ev) => {
 	let nameInput = document.getElementById("name").value;
 	let birthMonthInput = document.getElementById("month").value;
 	let birthDayInput = document.getElementById("day").value;
-	if ((personOverlayMode = "new")) {
+	if (personOverlayMode === "new") {
 		addPerson({
 			name: nameInput,
-			"birth-day": parseInt(birthMonthInput),
-			"birth-month": parseInt(birthDayInput),
+			"birth-month": parseInt(birthMonthInput),
+			"birth-day": parseInt(birthDayInput),
 		});
 	}
 	if (personOverlayMode === "edit") {
 		editPerson(currentPerson.id, {
 			name: nameInput,
-			"birth-day": parseInt(birthMonthInput),
-			"birth-month": parseInt(birthDayInput),
+			"birth-month": parseInt(birthMonthInput),
+			"birth-day": parseInt(birthDayInput),
 		});
 	}
 	hideOverlay(ev);
@@ -229,7 +252,7 @@ const createPeopleListener = (options) => {
 				});
 			});
 			await displayPeople(people);
-			if (options.selectFirstPerson) selectFirstPerson();
+			if (options?.selectFirstPerson) selectFirstPerson();
 		}
 	);
 };
