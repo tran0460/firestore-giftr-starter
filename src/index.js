@@ -27,6 +27,8 @@ const db = getFirestore(app);
 let people = [];
 let gifts = [];
 let currentPerson;
+let personOverlayMode = "new";
+let giftOverlayMode = "new";
 
 /* LISTENERS */
 document.addEventListener("DOMContentLoaded", async (ev) => {
@@ -104,6 +106,8 @@ const displayPeople = (data) => {
             <p class="name">${doc.name}</p>
             <p class="dob">${dob.toDateString().substring(4, 10)}
 				</p>
+				<button class="edit-person">Edit</button> 
+				<button class="delete-person">Delete</button> 
         </li>
 		`;
 	});
@@ -129,6 +133,8 @@ const displayGifts = (data) => {
 		</label>
 		<p class="title">${doc.idea}</p>
 		<p class="location">${doc.location}</p>
+		<button class="edit-idea">Edit</button> 
+		<button class="delete-idea">Delete</button> 
 	</li> `;
 	});
 };
@@ -138,23 +144,40 @@ const handleSavePerson = (ev) => {
 	let nameInput = document.getElementById("name").value;
 	let birthMonthInput = document.getElementById("month").value;
 	let birthDayInput = document.getElementById("day").value;
-	addPerson({
-		name: nameInput,
-		"birth-day": parseInt(birthMonthInput),
-		"birth-month": parseInt(birthDayInput),
-	});
+	if ((personOverlayMode = "new")) {
+		addPerson({
+			name: nameInput,
+			"birth-day": parseInt(birthMonthInput),
+			"birth-month": parseInt(birthDayInput),
+		});
+	}
+	if (personOverlayMode === "edit") {
+		editPerson(currentPerson.id, {
+			name: nameInput,
+			"birth-day": parseInt(birthMonthInput),
+			"birth-month": parseInt(birthDayInput),
+		});
+	}
 	hideOverlay(ev);
 };
 // Saves the form value and create a gift document from them
 const handleSaveIdea = (ev) => {
 	let titleInput = document.getElementById("title").value;
 	let locationInput = document.getElementById("location").value;
-	addIdea({
-		idea: titleInput,
-		location: locationInput,
-		reference: doc(db, "people", currentPerson.id),
-		bought: false,
-	});
+	if (giftOverlayMode === "new") {
+		addIdea({
+			idea: titleInput,
+			location: locationInput,
+			reference: doc(db, "people", currentPerson.id),
+			bought: false,
+		});
+	}
+	if (giftOverlayMode === "edit") {
+		editIdea(ev.target.parentElement.getAttribute("data-id"), {
+			idea: titleInput,
+			location: locationInput,
+		});
+	}
 	hideOverlay(ev);
 };
 // Listen to the people collection
@@ -203,6 +226,12 @@ const addPerson = (person) => {
 		.catch((err) => console.log(err));
 };
 
+// Edit the person with the given id using the given obj
+const editPerson = (id, newValues) => {
+	const ref = doc(db, "people", `${id}`);
+	updateDoc(ref, newValues).catch((err) => console.warn(err));
+};
+
 // Create a new gift for the person with the given object
 const addIdea = (giftIdea) => {
 	const ref = collection(db, "gift-ideas");
@@ -211,6 +240,7 @@ const addIdea = (giftIdea) => {
 		.catch((err) => console.warn(err));
 };
 
+// Edit the gift with the given id using the given obj
 const editIdea = (id, newValues) => {
 	const ref = doc(db, "gift-ideas", `${id}`);
 	updateDoc(ref, newValues).catch((err) => console.warn(err));
