@@ -159,6 +159,10 @@ const handleSavePerson = (ev) => {
 		});
 	}
 	hideOverlay(ev);
+	// reset form fields
+	nameInput = "";
+	birthMonthInput = "";
+	birthDayInput = "";
 };
 // Saves the form value and create a gift document from them
 const handleSaveIdea = (ev) => {
@@ -179,6 +183,9 @@ const handleSaveIdea = (ev) => {
 		});
 	}
 	hideOverlay(ev);
+	// reset form fields
+	titleInput = "";
+	locationInput = "";
 };
 // Listen to the people collection
 const createPeopleListener = (options) => {
