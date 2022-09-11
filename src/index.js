@@ -49,7 +49,14 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
 		.getElementById("btnSavePerson")
 		.addEventListener("click", handleSavePerson);
 	// Initial setup
-	document.querySelector(".person-list").addEventListener("click", (ev) => {});
+	document.querySelector(".person-list").addEventListener("click", (ev) => {
+		// If user accidentally clicks on ul, do nothing
+		if (ev.target.localName === "ul") return;
+		// If theres another active list item, make it not active anymore
+		if (document.querySelector("li.selected"))
+			document.querySelector("li.selected").className = "person";
+		ev.target.className = "person selected";
+	});
 	getPeople();
 });
 
@@ -66,7 +73,6 @@ function showOverlay(ev) {
 	ev.preventDefault();
 	document.querySelector(".overlay").classList.add("active");
 	const id = ev.target.id === "btnAddPerson" ? "dlgPerson" : "dlgIdea";
-	//TODO: check that person is selected before adding an idea
 	document.getElementById(id).classList.add("active");
 }
 
