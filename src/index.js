@@ -27,6 +27,7 @@ const db = getFirestore(app);
 let people = [];
 let gifts = [];
 let currentPerson;
+let currentGift;
 let personOverlayMode = "new";
 let giftOverlayMode = "new";
 
@@ -44,10 +45,14 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
 	document
 		.querySelector(".invisible-bg")
 		.addEventListener("click", hideOverlay);
-	document
-		.getElementById("btnAddPerson")
-		.addEventListener("click", showOverlay);
-	document.getElementById("btnAddIdea").addEventListener("click", showOverlay);
+	document.getElementById("btnAddPerson").addEventListener("click", (ev) => {
+		personOverlayMode = "new";
+		showOverlay(ev);
+	});
+	document.getElementById("btnAddIdea").addEventListener("click", (ev) => {
+		giftOverlayMode = "new";
+		showOverlay(ev);
+	});
 	document
 		.getElementById("btnSavePerson")
 		.addEventListener("click", handleSavePerson);
@@ -117,10 +122,27 @@ const displayGifts = (data) => {
 	if (!currentPerson) return;
 	const listContainer = document.querySelector(".idea-list");
 	listContainer.addEventListener("click", (e) => {
-		if (e.target.localName === "input")
-			editIdea(e.target.parentElement.parentElement.getAttribute("data-id"), {
-				bought: e.target.checked,
-			});
+		switch (e.target.localName) {
+			case "input":
+				editIdea(e.target.parentElement.parentElement.getAttribute("data-id"), {
+					bought: e.target.checked,
+				});
+				break;
+			case "button":
+				if (e.target.className === "edit-idea") {
+					giftOverlayMode = "edit";
+					// find the data for the item the user has clicked
+					currentGift = gifts.find(
+						(gift) => gift.id === e.target.parentElement.getAttribute("data-id")
+					);
+					// set the form values
+					document.getElementById("title").value = currentGift.idea;
+					document.getElementById("location").value = currentGift.location;
+					// toggle overlay
+					showOverlay(e);
+				}
+				break;
+		}
 	});
 	listContainer.innerHTML = data.map((doc) => {
 		if (doc.reference.id !== currentPerson.id) return;
@@ -177,7 +199,7 @@ const handleSaveIdea = (ev) => {
 		});
 	}
 	if (giftOverlayMode === "edit") {
-		editIdea(ev.target.parentElement.getAttribute("data-id"), {
+		editIdea(currentGift.id, {
 			idea: titleInput,
 			location: locationInput,
 		});
