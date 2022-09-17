@@ -126,12 +126,15 @@ const displayPeople = (data) => {
 			deletePerson(currentPerson.id);
 		}
 	});
+	if (data.length === 0)
+		return (listContainer.innerHTML =
+			'<li class="idea"><p></p><p>You have no friends :( </p></li>');
 	listContainer.innerHTML = data.map((doc) => {
 		let dob = new Date();
 		dob.setMonth(doc["birth-month"] - 1);
 		dob.setDate(doc["birth-day"]);
 		return `
-		<li data-id="${doc.id}" class="person">
+		<li data-id="${doc.id}" class="person ${data.length === 1 ? "selected" : ""}">
             <p class="name">${doc.name}</p>
             <p class="dob">${dob.toDateString().substring(4, 10)}
 				</p>
@@ -140,6 +143,7 @@ const displayPeople = (data) => {
         </li>
 		`;
 	});
+	if (currentPerson) selectCurrentPerson();
 };
 // Takes the people data and set the innerHTML of the list container for each gift
 const displayGifts = (data) => {
@@ -171,8 +175,14 @@ const displayGifts = (data) => {
 				break;
 		}
 	});
-	listContainer.innerHTML = data.map((doc) => {
-		if (doc.reference.id !== currentPerson.id) return;
+	let currentPersonGifts = data.filter((doc) => {
+		return doc["person-id"].id === currentPerson.id ? doc : null;
+	});
+	if (currentPersonGifts.length == 0)
+		// if there are no gifts
+		return (listContainer.innerHTML =
+			'<li class="idea"><p></p><p>No Gift Ideas for selected person.</p></li>');
+	listContainer.innerHTML = currentPersonGifts.map((doc) => {
 		return `<li class="idea" data-id="${doc.id}">
 		<label for="${doc.id}">
 			<input type="checkbox" class="gift-status" id="${doc.id}" ${
@@ -237,7 +247,7 @@ const handleSaveIdea = (ev) => {
 	document.getElementById("location").value = "";
 };
 // Listen to the people collection
-const createPeopleListener = (options) => {
+const createPeopleListener = () => {
 	const ref = collection(db, "people");
 	let cleanup = onSnapshot(
 		ref,
@@ -252,7 +262,6 @@ const createPeopleListener = (options) => {
 				});
 			});
 			await displayPeople(people);
-			if (options?.selectFirstPerson) selectFirstPerson();
 		}
 	);
 };
