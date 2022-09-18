@@ -65,8 +65,9 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
 		// If user accidentally clicks on ul, do nothing
 		if (ev.target.localName === "ul" || ev.target.localName === "button")
 			return;
-		selectPerson(ev.target);
-		displayGifts(gifts);
+		selectPerson(
+			people.find((item) => item.id === ev.target.getAttribute("data-id"))
+		);
 	});
 	createPeopleListener({ selectFirstPerson: true });
 	createGiftsListener();
@@ -88,30 +89,28 @@ function showOverlay(ev) {
 	document.getElementById(id).classList.add("active");
 }
 
-const selectPerson = (target) => {
+const selectPerson = (newPerson) => {
+	currentPerson = newPerson;
+	console.log("select " + newPerson.name);
 	// If theres another active list item, make it not active anymore
 	if (document.querySelector("li.selected"))
 		document.querySelector("li.selected").className = "person";
-	target.className = "person selected";
-	// Set current person variable to currently selected person
-	currentPerson = people.find(
-		(person) => person.id === target.getAttribute("data-id")
-	);
-};
-
-const selectFirstPerson = () => {
-	if (people.length === 0) return;
-	document.querySelector(".person").className = "person selected";
-	currentPerson = people[0];
+	// Make the current person list item active
+	document.querySelector(`[data-id="${currentPerson.id}"]`).className =
+		"person selected";
+	displayGifts(gifts);
 };
 
 // Takes the people data and set the innerHTML of the list container for each person
-const displayPeople = (data) => {
+const displayPeople = (data, selectFirstPerson) => {
+	if (currentPerson != undefined) selectPerson(currentPerson);
 	const listContainer = document.querySelector(".person-list");
 	listContainer.addEventListener("click", (e) => {
 		if (e.target.localName != "button") return;
 		if (e.target.className === "edit-person") {
-			selectPerson(e.target.parentElement);
+			selectPerson(
+				data?.find((item) => item.id === e.target.getAttribute("data-id"))
+			);
 			personOverlayMode = "edit";
 			// set the form values
 			document.getElementById("name").value = currentPerson.name;
@@ -122,8 +121,11 @@ const displayPeople = (data) => {
 			showOverlay(e);
 		}
 		if (e.target.className === "delete-person") {
-			selectPerson(e.target.parentElement);
-			deletePerson(currentPerson.id);
+			deletePerson(
+				data?.find(
+					(item) => item.id === e.target.parentElement.getAttribute("data-id")
+				).id
+			);
 		}
 	});
 	if (data.length === 0)
@@ -134,16 +136,16 @@ const displayPeople = (data) => {
 		dob.setMonth(doc["birth-month"] - 1);
 		dob.setDate(doc["birth-day"]);
 		return `
-		<li data-id="${doc.id}" class="person ${data.length === 1 ? "selected" : ""}">
-            <p class="name">${doc.name}</p>
-            <p class="dob">${dob.toDateString().substring(4, 10)}
+				<li data-id="${doc.id}" class="person ${data.length === 1 ? "selected" : ""}">
+				<p class="name">${doc.name}</p>
+				<p class="dob">${dob.toDateString().substring(4, 10)}
 				</p>
 				<button class="edit-person">Edit</button> 
 				<button class="delete-person">Delete</button> 
-        </li>
-		`;
+				</li>
+				`;
 	});
-	if (currentPerson) selectCurrentPerson();
+	if (data.length === 1 || selectFirstPerson) selectPerson(data[0]);
 };
 // Takes the people data and set the innerHTML of the list container for each gift
 const displayGifts = (data) => {
@@ -247,7 +249,7 @@ const handleSaveIdea = (ev) => {
 	document.getElementById("location").value = "";
 };
 // Listen to the people collection
-const createPeopleListener = () => {
+const createPeopleListener = (options) => {
 	const ref = collection(db, "people");
 	let cleanup = onSnapshot(
 		ref,
@@ -261,7 +263,7 @@ const createPeopleListener = () => {
 					id: doc.id,
 				});
 			});
-			await displayPeople(people);
+			await displayPeople(people, options?.selectFirstPerson);
 		}
 	);
 };
@@ -277,7 +279,6 @@ const createGiftsListener = () => {
 				let data = doc.data();
 				gifts.push({ ...data, id: doc.id });
 			});
-			displayGifts(gifts);
 		}
 	);
 };
