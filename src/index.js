@@ -34,6 +34,9 @@ let giftOverlayMode = "new";
 
 /* LISTENERS */
 document.addEventListener("DOMContentLoaded", async (ev) => {
+	// Set up listeners
+	createPeopleListener();
+	createGiftsListener();
 	// Prevent overlay from appearing
 	hideOverlay(ev);
 	//set up the dom events
@@ -69,8 +72,6 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
 			people.find((item) => item.id === ev.target.getAttribute("data-id"))
 		);
 	});
-	createPeopleListener({ selectFirstPerson: true });
-	createGiftsListener();
 });
 
 /*********FUNCTIONS*********/
@@ -91,7 +92,6 @@ function showOverlay(ev) {
 
 const selectPerson = (newPerson) => {
 	currentPerson = newPerson;
-	console.log("select " + newPerson.name);
 	// If theres another active list item, make it not active anymore
 	if (document.querySelector("li.selected"))
 		document.querySelector("li.selected").className = "person";
@@ -102,7 +102,7 @@ const selectPerson = (newPerson) => {
 };
 
 // Takes the people data and set the innerHTML of the list container for each person
-const displayPeople = (data, selectFirstPerson) => {
+const displayPeople = (data) => {
 	if (currentPerson != undefined) selectPerson(currentPerson);
 	const listContainer = document.querySelector(".person-list");
 	listContainer.addEventListener("click", (e) => {
@@ -145,7 +145,7 @@ const displayPeople = (data, selectFirstPerson) => {
 				</li>
 				`;
 	});
-	if (data.length === 1 || selectFirstPerson) selectPerson(data[0]);
+	selectPerson(data[0]);
 };
 // Takes the people data and set the innerHTML of the list container for each gift
 const displayGifts = (data) => {
@@ -249,7 +249,7 @@ const handleSaveIdea = (ev) => {
 	document.getElementById("location").value = "";
 };
 // Listen to the people collection
-const createPeopleListener = (options) => {
+const createPeopleListener = () => {
 	const ref = collection(db, "people");
 	let cleanup = onSnapshot(
 		ref,
@@ -263,7 +263,7 @@ const createPeopleListener = (options) => {
 					id: doc.id,
 				});
 			});
-			await displayPeople(people, options?.selectFirstPerson);
+			await displayPeople(people);
 		}
 	);
 };
@@ -279,6 +279,7 @@ const createGiftsListener = () => {
 				let data = doc.data();
 				gifts.push({ ...data, id: doc.id });
 			});
+			displayGifts(gifts);
 		}
 	);
 };
