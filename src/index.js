@@ -92,6 +92,7 @@ function showOverlay(ev) {
 
 const selectPerson = (newPerson) => {
 	currentPerson = newPerson;
+	if (newPerson === undefined) return;
 	// If theres another active list item, make it not active anymore
 	if (document.querySelector("li.selected"))
 		document.querySelector("li.selected").className = "person";
@@ -109,7 +110,9 @@ const displayPeople = (data) => {
 		if (e.target.localName != "button") return;
 		if (e.target.className === "edit-person") {
 			selectPerson(
-				data?.find((item) => item.id === e.target.getAttribute("data-id"))
+				data?.find(
+					(item) => item.id === e.target.parentElement.getAttribute("data-id")
+				)
 			);
 			personOverlayMode = "edit";
 			// set the form values
@@ -128,9 +131,12 @@ const displayPeople = (data) => {
 			);
 		}
 	});
-	if (data.length === 0)
+	if (data.length === 0) {
+		selectPerson(undefined);
+		displayGifts([]);
 		return (listContainer.innerHTML =
 			'<li class="idea"><p></p><p>You have no friends :( </p></li>');
+	}
 	listContainer.innerHTML = data.map((doc) => {
 		let dob = new Date();
 		dob.setMonth(doc["birth-month"] - 1);
@@ -149,8 +155,8 @@ const displayPeople = (data) => {
 };
 // Takes the people data and set the innerHTML of the list container for each gift
 const displayGifts = (data) => {
-	if (!currentPerson) return;
 	const listContainer = document.querySelector(".idea-list");
+	if (!currentPerson) return (listContainer.innerHTML = "");
 	listContainer.addEventListener("click", (e) => {
 		switch (e.target.localName) {
 			case "input":
