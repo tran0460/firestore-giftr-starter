@@ -46,9 +46,7 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
 	document
 		.getElementById("btnCancelIdea")
 		.addEventListener("click", hideOverlay);
-	document
-		.querySelector(".invisible-bg")
-		.addEventListener("click", hideOverlay);
+	document.querySelector(".invisible-bg").addEventListener("click", hideOverlay);
 	document.getElementById("btnAddPerson").addEventListener("click", (ev) => {
 		personOverlayMode = "new";
 		showOverlay(ev);
@@ -66,8 +64,7 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
 	// Initial setup
 	document.querySelector(".person-list").addEventListener("click", (ev) => {
 		// If user accidentally clicks on ul, do nothing
-		if (ev.target.localName === "ul" || ev.target.localName === "button")
-			return;
+		if (ev.target.localName === "ul" || ev.target.localName === "button") return;
 		selectPerson(
 			people.find((item) => item.id === ev.target.getAttribute("data-id"))
 		);
@@ -97,7 +94,7 @@ const selectPerson = (newPerson) => {
 	if (document.querySelector("li.selected"))
 		document.querySelector("li.selected").className = "person";
 	// Make the current person list item active
-	document.querySelector(`[data-id="${currentPerson.id}"]`).className =
+	document.querySelector(`[data-id="${currentPerson?.id}"]`).className =
 		"person selected";
 	displayGifts(gifts);
 };
