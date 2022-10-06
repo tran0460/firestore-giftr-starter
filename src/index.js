@@ -276,6 +276,7 @@ const createPeopleListener = () => {
       await displayPeople(people);
     }
   );
+  return cleanup;
 };
 // Listen to gifts collection
 const createGiftsListener = () => {
@@ -292,6 +293,7 @@ const createGiftsListener = () => {
       displayGifts(gifts);
     }
   );
+  return cleanup;
 };
 // Create a new document in the people collection with the given object
 const addPerson = (person) => {
