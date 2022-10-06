@@ -1,5 +1,12 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import {
+  getAuth,
+  onAuthStateChanged,
+  GithubAuthProvider,
+  signInWithPopup,
+  browserSessionPersistence,
+  setPersistence,
+} from "firebase/auth";
 
 import {
   getFirestore,
@@ -25,6 +32,31 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 // Initialize Auth
 const auth = getAuth(app);
+
+const provider = new GithubAuthProvider();
+setPersistence(auth, browserSessionPersistence)
+  .then(() => {
+    // Existing and future Auth states are now persisted in the current
+    // session only. Closing the window would clear any existing state even
+    // if a user forgets to sign out.
+    const provider = new GithubAuthProvider();
+    // ...
+    // New sign-in will be persisted with session persistence.
+    signInWithPopup(auth, provider)
+      .then((user) => {})
+      .catch((err) => {});
+    //return the call to your desired login method
+  })
+  .catch((error) => {
+    // Handle Errors here.
+    const errorCode = error.code;
+    const errorMessage = error.message;
+  });
+auth.languageCode = "en";
+provider.setCustomParameters({
+  allow_signup: "true", //let the user signup for a Github account through the interface
+});
+
 // get a reference to the database
 const db = getFirestore(app);
 
@@ -41,6 +73,7 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
   // Prevent overlay from appearing
   hideOverlay(ev);
   //set up the dom events
+  authCheck();
   document
     .getElementById("btnCancelPerson")
     .addEventListener("click", hideOverlay);
@@ -73,9 +106,42 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
       people.find((item) => item.id === ev.target.getAttribute("data-id"))
     );
   });
+  // Auth handler button
+  document.querySelector(".auth-handler").addEventListener("click", (ev) => {
+    console.log("run");
+    ev.target.textContent === "Sign In" ? attemptLogin() : attemptLogout();
+  });
 });
 
 /*********FUNCTIONS*********/
+// Login function
+function attemptLogin() {
+  //try to login with the global auth and provider objects
+  signInWithPopup(auth, provider)
+    .then((result) => {
+      //IF YOU USED GITHUB PROVIDER
+      const credential = GithubAuthProvider.credentialFromResult(result);
+      const token = credential.accessToken;
+      // The signed-in user info.
+      const user = result.user;
+      // ...
+    })
+    .catch((error) => {
+      // Handle Errors here.
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorMessage);
+      // The email of the user's account used.
+      const email = error.customData.email;
+
+      //OR
+      const credential = GithubAuthProvider.credentialFromError(error);
+    });
+}
+
+function attemptLogout() {
+  auth.signOut().catch((err) => console.warn(err));
+}
 // UI related
 function hideOverlay(ev) {
   ev.preventDefault();
@@ -261,6 +327,8 @@ const authCheck = () => {
   let giftsCleanup;
   onAuthStateChanged(auth, (user) => {
     if (user) {
+      document.querySelector(".auth-handler").textContent = "Sign Out";
+      console.log(user);
       const uid = user.uid;
       // TODO: set up listeners, display page
       // Set up listeners
@@ -268,6 +336,9 @@ const authCheck = () => {
       giftsCleanup = createGiftsListener();
       // ...
     } else {
+      console.log("signed out");
+      document.querySelector(".auth-handler").textContent = "Sign In";
+
       // ...
       // TODO: clean up listeners, clear page
       if (!userCleanup && !giftsCleanup) return;
