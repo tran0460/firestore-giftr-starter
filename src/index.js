@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 import {
   getFirestore,
@@ -38,9 +38,6 @@ let giftOverlayMode = "new";
 
 /* LISTENERS */
 document.addEventListener("DOMContentLoaded", async (ev) => {
-  // Set up listeners
-  createPeopleListener();
-  createGiftsListener();
   // Prevent overlay from appearing
   hideOverlay(ev);
   //set up the dom events
@@ -257,6 +254,25 @@ const handleSaveIdea = (ev) => {
   // reset form fields
   document.getElementById("title").value = "";
   document.getElementById("location").value = "";
+};
+// Listen for auth state changes
+const authCheck = () => {
+  let userCleanup;
+  let giftsCleanup;
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      const uid = user.uid;
+      // TODO: set up listeners, display page
+      // Set up listeners
+      userCleanup = createPeopleListener();
+      giftsCleanup = createGiftsListener();
+      // ...
+    } else {
+      // ...
+      // TODO: clean up listeners, clear page
+      if (!userCleanup && !giftsCleanup) return;
+    }
+  });
 };
 // Listen to the people collection
 const createPeopleListener = () => {
