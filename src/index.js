@@ -6,7 +6,6 @@ import {
   signInWithPopup,
   browserSessionPersistence,
   setPersistence,
-  signInWithCredential,
 } from "firebase/auth";
 
 import {
@@ -35,20 +34,12 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 const provider = new GithubAuthProvider();
-setPersistence(auth, browserSessionPersistence)
-  .then(() => {
-    // Existing and future Auth states are now persisted in the current
-    // session only. Closing the window would clear any existing state even
-    // if a user forgets to sign out.
-    // ...
-    // New sign-in will be persisted with session persistence.
-    //return the call to your desired login method
-  })
-  .catch((error) => {
-    // Handle Errors here.
-    const errorCode = error.code;
-    const errorMessage = error.message;
-  });
+setPersistence(auth, browserSessionPersistence).catch((error) => {
+  // Handle Errors here.
+  const errorCode = error.code;
+  const errorMessage = error.message;
+  console.log(errorCode + " " + errorMessage);
+});
 auth.languageCode = "en";
 provider.setCustomParameters({
   allow_signup: "true", //let the user signup for a Github account through the interface
@@ -123,21 +114,6 @@ function attemptLogin() {
 function attemptLogout() {
   auth.signOut().catch((err) => console.warn(err));
 }
-function validateWithToken(token) {
-  const credential = GithubAuthProvider.credential(token);
-  signInWithCredential(auth, credential)
-    .then((result) => {
-      console.log(result);
-      //the token and credential were still valid
-    })
-    .catch((error) => {
-      // Handle Errors here.
-      const errorCode = error.code;
-      const errorMessage = error.message;
-
-      console.log(errorMessage);
-    });
-}
 // UI related
 function hideOverlay(ev) {
   ev.preventDefault();
@@ -187,11 +163,12 @@ const displayPeople = (data) => {
       showOverlay(e);
     }
     if (e.target.className === "delete-person") {
-      deletePerson(
-        data?.find(
-          (item) => item.id === e.target.parentElement.getAttribute("data-id")
-        ).id
-      );
+      if (confirm("Are you sure you want to delete this person"))
+        return deletePerson(
+          data?.find(
+            (item) => item.id === e.target.parentElement.getAttribute("data-id")
+          ).id
+        );
     }
   });
   if (data.length === 0) {
@@ -209,8 +186,8 @@ const displayPeople = (data) => {
 				<p class="name">${doc.name}</p>
 				<p class="dob">${dob.toDateString().substring(4, 10)}
 				</p>
-				<button class="edit-person">Edit</button> 
-				<button class="delete-person">Delete</button> 
+          <button class="edit-person">Edit</button>
+          <button class="delete-person">Delete</button>
 				</li>
 				`;
   });
@@ -241,7 +218,8 @@ const displayGifts = (data) => {
           showOverlay(e);
         }
         if (e.target.className === "delete-idea") {
-          deleteIdea(currentGift.id);
+          if (confirm("Are you sure you want to delete this gift"))
+            return deleteIdea(currentGift.id);
         }
         break;
     }
@@ -263,8 +241,8 @@ const displayGifts = (data) => {
 		</label>
 		<p class="title">${doc.idea}</p>
 		<p class="location">${doc.location}</p>
-		<button class="edit-idea">Edit</button> 
-		<button class="delete-idea">Delete</button> 
+      <button class="edit-idea">Edit</button>
+      <button class="delete-idea">Delete</button>
 	</li> `;
   });
 };
