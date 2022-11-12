@@ -6,6 +6,7 @@ import {
   signInWithPopup,
   browserSessionPersistence,
   setPersistence,
+  signInWithCredential,
 } from "firebase/auth";
 
 import {
@@ -39,12 +40,8 @@ setPersistence(auth, browserSessionPersistence)
     // Existing and future Auth states are now persisted in the current
     // session only. Closing the window would clear any existing state even
     // if a user forgets to sign out.
-    const provider = new GithubAuthProvider();
     // ...
     // New sign-in will be persisted with session persistence.
-    signInWithPopup(auth, provider)
-      .then((user) => {})
-      .catch((err) => {});
     //return the call to your desired login method
   })
   .catch((error) => {
@@ -108,7 +105,6 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
   });
   // Auth handler button
   document.querySelector(".auth-handler").addEventListener("click", (ev) => {
-    console.log("run");
     ev.target.textContent === "Sign In" ? attemptLogin() : attemptLogout();
   });
 });
@@ -124,6 +120,7 @@ function attemptLogin() {
       const token = credential.accessToken;
       // The signed-in user info.
       const user = result.user;
+      console.log(token);
       // ...
     })
     .catch((error) => {
@@ -141,6 +138,21 @@ function attemptLogin() {
 
 function attemptLogout() {
   auth.signOut().catch((err) => console.warn(err));
+}
+function validateWithToken(token) {
+  const credential = GithubAuthProvider.credential(token);
+  signInWithCredential(auth, credential)
+    .then((result) => {
+      console.log(result);
+      //the token and credential were still valid
+    })
+    .catch((error) => {
+      // Handle Errors here.
+      const errorCode = error.code;
+      const errorMessage = error.message;
+
+      console.log(errorMessage);
+    });
 }
 // UI related
 function hideOverlay(ev) {
@@ -171,6 +183,7 @@ const selectPerson = (newPerson) => {
 
 // Takes the people data and set the innerHTML of the list container for each person
 const displayPeople = (data) => {
+  console.log(data);
   if (currentPerson != undefined) selectPerson(currentPerson);
   const listContainer = document.querySelector(".person-list");
   listContainer.addEventListener("click", (e) => {
@@ -328,20 +341,25 @@ const authCheck = () => {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       document.querySelector(".auth-handler").textContent = "Sign Out";
-      console.log(user);
+      document.getElementById("btnAddPerson").disabled = false;
+      document.getElementById("btnAddIdea").disabled = false;
       const uid = user.uid;
+      //   validateWithToken(user.accessToken);
       // TODO: set up listeners, display page
       // Set up listeners
       userCleanup = createPeopleListener();
       giftsCleanup = createGiftsListener();
       // ...
     } else {
-      console.log("signed out");
       document.querySelector(".auth-handler").textContent = "Sign In";
-
+      document.getElementById("btnAddPerson").disabled = true;
+      document.getElementById("btnAddIdea").disabled = true;
       // ...
       // TODO: clean up listeners, clear page
       if (!userCleanup && !giftsCleanup) return;
+      userCleanup();
+      giftsCleanup();
+      displayPeople([]);
     }
   });
 };
@@ -360,7 +378,7 @@ const createPeopleListener = () => {
           id: doc.id,
         });
       });
-      await displayPeople(people);
+      displayPeople(people);
     }
   );
   return cleanup;
