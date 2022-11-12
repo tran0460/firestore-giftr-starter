@@ -113,27 +113,11 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
 // Login function
 function attemptLogin() {
   //try to login with the global auth and provider objects
-  signInWithPopup(auth, provider)
-    .then((result) => {
-      //IF YOU USED GITHUB PROVIDER
-      const credential = GithubAuthProvider.credentialFromResult(result);
-      const token = credential.accessToken;
-      // The signed-in user info.
-      const user = result.user;
-      console.log(token);
-      // ...
-    })
-    .catch((error) => {
-      // Handle Errors here.
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.log(errorMessage);
-      // The email of the user's account used.
-      const email = error.customData.email;
-
-      //OR
-      const credential = GithubAuthProvider.credentialFromError(error);
-    });
+  signInWithPopup(auth, provider).catch((error) => {
+    // Handle Errors here.
+    const errorMessage = error.message;
+    console.log(errorMessage);
+  });
 }
 
 function attemptLogout() {
@@ -183,7 +167,6 @@ const selectPerson = (newPerson) => {
 
 // Takes the people data and set the innerHTML of the list container for each person
 const displayPeople = (data) => {
-  console.log(data);
   if (currentPerson != undefined) selectPerson(currentPerson);
   const listContainer = document.querySelector(".person-list");
   listContainer.addEventListener("click", (e) => {
@@ -343,8 +326,6 @@ const authCheck = () => {
       document.querySelector(".auth-handler").textContent = "Sign Out";
       document.getElementById("btnAddPerson").disabled = false;
       document.getElementById("btnAddIdea").disabled = false;
-      const uid = user.uid;
-      //   validateWithToken(user.accessToken);
       // TODO: set up listeners, display page
       // Set up listeners
       userCleanup = createPeopleListener();
