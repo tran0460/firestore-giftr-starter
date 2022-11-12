@@ -197,7 +197,8 @@ dialog.active :is(input, button) {
   font-family: inherit;
   font-weight: inherit;
 }
-dialog button {
+dialog button,
+button {
   margin: 0 2rem;
   padding: 0.1rem 2rem;
   border: 1px solid var(--dark-orange);
@@ -224,4 +225,13 @@ dialog button {
   border-radius: var(--radii);
   cursor: pointer;
   min-height: 2rem;
+}
+
+.edit-idea,
+.delete-idea {
+  margin: 0.5rem 0;
+}
+.delete-idea {
+  margin: auto;
+  min-width: 60%;
 }
