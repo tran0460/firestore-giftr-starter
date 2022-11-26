@@ -16,6 +16,7 @@ import {
   onSnapshot,
   updateDoc,
   deleteDoc,
+  setDoc,
 } from "firebase/firestore";
 
 /* FIREBASE CONFIGS */
