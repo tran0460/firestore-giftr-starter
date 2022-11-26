@@ -98,17 +98,93 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
   document.querySelector(".auth-handler").addEventListener("click", (ev) => {
     ev.target.textContent === "Sign In" ? attemptLogin() : attemptLogout();
   });
+
+  // Click handler for people
+  document.querySelector(".person-list").addEventListener("click", (e) => {
+    if (e.target.localName != "button") return;
+    if (e.target.className === "edit-person") {
+      selectPerson(
+        people?.find(
+          (item) => item.id === e.target.parentElement.getAttribute("data-id")
+        )
+      );
+      personOverlayMode = "edit";
+      // set the form values
+      document.getElementById("name").value = currentPerson.name;
+      document.getElementById("month").value = currentPerson["birth-month"];
+      document.getElementById("day").value = currentPerson["birth-day"];
+      // toggle overlay
+      e.target.id = "btnAddPerson";
+      showOverlay(e);
+    }
+    if (e.target.className === "delete-person") {
+      const requestOK = confirm("Are you sure you want to delete this person");
+      if (requestOK)
+        return deletePerson(
+          people?.find(
+            (item) => item.id === e.target.parentElement.getAttribute("data-id")
+          ).id
+        );
+    }
+  });
+  // Click handler for idea items
+  document.querySelector(".idea-list").addEventListener("click", (e) => {
+    e.preventDefault();
+    switch (e.target.localName) {
+      case "input":
+        editIdea(e.target.parentElement.parentElement.getAttribute("data-id"), {
+          bought: e.target.checked,
+        });
+        break;
+      case "button":
+        currentGift = gifts.find(
+          (gift) => gift.id === e.target.parentElement.getAttribute("data-id")
+        );
+        if (e.target.className === "edit-idea") {
+          giftOverlayMode = "edit";
+          // find the data for the item the user has clicked
+          // set the form values
+          document.getElementById("title").value = currentGift.idea;
+          document.getElementById("location").value = currentGift.location;
+          // toggle overlay
+          showOverlay(e);
+        }
+        if (e.target.className === "delete-idea") {
+          console.log("delete idea clicked");
+          const requestOK = confirm(
+            "Are you sure you want to delete this gift"
+          );
+          if (requestOK) return deleteIdea(currentGift.id);
+        }
+        break;
+    }
+  });
 });
 
 /*********FUNCTIONS*********/
 // Login function
 function attemptLogin() {
   //try to login with the global auth and provider objects
-  signInWithPopup(auth, provider).catch((error) => {
-    // Handle Errors here.
-    const errorMessage = error.message;
-    console.log(errorMessage);
-  });
+  signInWithPopup(auth, provider)
+    .then((result) => {
+      const user = result.user;
+      //call setDoc to add/update the user document in the `users` collection
+      const usersColRef = collection(db, "users");
+      setDoc(
+        doc(usersColRef, user.uid),
+        {
+          displayName: user.displayName,
+        },
+        { merge: true }
+      );
+      // plus any other fields you want to save in the object
+      //When calling doc(), if the document does not exist, it will be created
+    })
+    .catch((error) => {
+      // Handle Errors here.
+      const errorMessage = error.message;
+      console.log(errorMessage);
+    });
 }
 
 function attemptLogout() {
@@ -145,32 +221,6 @@ const selectPerson = (newPerson) => {
 const displayPeople = (data) => {
   if (currentPerson != undefined) selectPerson(currentPerson);
   const listContainer = document.querySelector(".person-list");
-  listContainer.addEventListener("click", (e) => {
-    if (e.target.localName != "button") return;
-    if (e.target.className === "edit-person") {
-      selectPerson(
-        data?.find(
-          (item) => item.id === e.target.parentElement.getAttribute("data-id")
-        )
-      );
-      personOverlayMode = "edit";
-      // set the form values
-      document.getElementById("name").value = currentPerson.name;
-      document.getElementById("month").value = currentPerson["birth-month"];
-      document.getElementById("day").value = currentPerson["birth-day"];
-      // toggle overlay
-      e.target.id = "btnAddPerson";
-      showOverlay(e);
-    }
-    if (e.target.className === "delete-person") {
-      if (confirm("Are you sure you want to delete this person"))
-        return deletePerson(
-          data?.find(
-            (item) => item.id === e.target.parentElement.getAttribute("data-id")
-          ).id
-        );
-    }
-  });
   if (data.length === 0) {
     selectPerson(undefined);
     displayGifts([]);
@@ -197,33 +247,6 @@ const displayPeople = (data) => {
 const displayGifts = (data) => {
   const listContainer = document.querySelector(".idea-list");
   if (!currentPerson) return (listContainer.innerHTML = "");
-  listContainer.addEventListener("click", (e) => {
-    switch (e.target.localName) {
-      case "input":
-        editIdea(e.target.parentElement.parentElement.getAttribute("data-id"), {
-          bought: e.target.checked,
-        });
-        break;
-      case "button":
-        currentGift = gifts.find(
-          (gift) => gift.id === e.target.parentElement.getAttribute("data-id")
-        );
-        if (e.target.className === "edit-idea") {
-          giftOverlayMode = "edit";
-          // find the data for the item the user has clicked
-          // set the form values
-          document.getElementById("title").value = currentGift.idea;
-          document.getElementById("location").value = currentGift.location;
-          // toggle overlay
-          showOverlay(e);
-        }
-        if (e.target.className === "delete-idea") {
-          if (confirm("Are you sure you want to delete this gift"))
-            return deleteIdea(currentGift.id);
-        }
-        break;
-    }
-  });
   let currentPersonGifts = data.filter((doc) => {
     return doc["person-id"].id === currentPerson.id ? doc : null;
   });
@@ -257,6 +280,7 @@ const handleSavePerson = (ev) => {
       name: nameInput,
       "birth-month": parseInt(birthMonthInput),
       "birth-day": parseInt(birthDayInput),
+      owner: doc(db, "users", auth.currentUser.uid),
     });
   }
   if (personOverlayMode === "edit") {
