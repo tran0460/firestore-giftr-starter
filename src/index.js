@@ -17,6 +17,8 @@ import {
   updateDoc,
   deleteDoc,
   setDoc,
+  query,
+  where,
 } from "firebase/firestore";
 
 /* FIREBASE CONFIGS */
@@ -353,8 +355,10 @@ const authCheck = () => {
 // Listen to the people collection
 const createPeopleListener = () => {
   const ref = collection(db, "people");
+  const ownerRef = doc(db, "users", auth.currentUser.uid);
+  const q = query(ref, where("owner", "==", ownerRef));
   let cleanup = onSnapshot(
-    ref,
+    q,
     { includeMetadataChanges: true },
     async (snapshot) => {
       people = [];
