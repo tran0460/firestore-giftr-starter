@@ -1,7 +1,7 @@
 :root {
-  --dark-orange: #f5820d;
-  --light-orange: #ffcb2a;
-  --very-light-orange: #ffeb9a;
+  --primary: #3c1518;
+  --secondary: #d4df9e;
+  --light: #ffeb9a;
   --radii: 0.4rem;
 }
 * {
@@ -22,19 +22,19 @@ main {
   padding: 1rem 4rem;
 }
 header {
-  background-color: var(--light-orange);
-  border-bottom: 0.1rem solid var(--dark-orange);
+  background-color: var(--secondary);
+  border-bottom: 0.1rem solid var(--primary);
 }
 header h1 {
   font-size: 4rem;
   font-weight: 500;
   color: #fff;
-  text-shadow: 2px 2px 2px var(--dark-orange);
+  text-shadow: 2px 2px 2px var(--primary);
 }
 header h2 {
   font-size: 2.5rem;
   font-weight: 300;
-  color: var(--dark-orange);
+  color: var(--primary);
 }
 main {
   display: flex;
@@ -50,20 +50,20 @@ main > section {
 section.ideas {
   min-height: 100vh;
   padding-left: 1rem;
-  border-left: 1px solid var(--light-orange);
+  border-left: 1px solid var(--secondary);
 }
 section h2 {
   font-size: 2rem;
-  color: var(--dark-orange);
+  color: var(--primary);
   display: flex;
   justify-content: space-between;
 }
 section h2 > button {
   margin-right: 4rem;
   padding: 0.1rem 2rem;
-  border: 1px solid var(--dark-orange);
+  border: 1px solid var(--primary);
   background-color: #fff;
-  color: var(--dark-orange);
+  color: var(--primary);
   border-radius: var(--radii);
   cursor: pointer;
   -webkit-border-radius: var(--radii);
@@ -84,7 +84,7 @@ ul {
   pointer-events: none;
 }
 .person-list li.selected {
-  background-color: var(--light-orange);
+  background-color: var(--secondary);
 }
 .person-list p.name {
   font-size: 1.2rem;
@@ -125,7 +125,7 @@ ul {
   color: #555;
 }
 .idea-list .idea [type="checkbox"] {
-  accent-color: var(--light-orange);
+  accent-color: var(--secondary);
 }
 .idea-list p.title {
   font-size: 1.2rem;
@@ -175,7 +175,7 @@ dialog.active {
   z-index: 10;
 }
 dialog.active h2 {
-  background-color: var(--dark-orange);
+  background-color: var(--primary);
   color: #fff;
   padding: 1rem 3rem;
   font-size: 2rem;
@@ -201,9 +201,9 @@ dialog button,
 button {
   margin: 0 2rem;
   padding: 0.1rem 2rem;
-  border: 1px solid var(--dark-orange);
+  border: 1px solid var(--primary);
   background-color: #fff;
-  color: var(--dark-orange);
+  color: var(--primary);
   border-radius: var(--radii);
   cursor: pointer;
 }
@@ -213,15 +213,15 @@ button {
   height: 100%;
 }
 :is(dialog, h2) button:active {
-  background-color: var(--light-orange);
+  background-color: var(--secondary);
 }
 
 .auth-handler {
   margin: 0 2rem;
   padding: 0.1rem 2rem;
-  border: 1px solid var(--dark-orange);
+  border: 1px solid var(--primary);
   background-color: #fff;
-  color: var(--dark-orange);
+  color: var(--primary);
   border-radius: var(--radii);
   cursor: pointer;
   min-height: 2rem;
