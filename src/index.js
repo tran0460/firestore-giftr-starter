@@ -291,6 +291,7 @@ const handleSavePerson = (ev) => {
       name: nameInput,
       "birth-month": parseInt(birthMonthInput),
       "birth-day": parseInt(birthDayInput),
+      owner: doc(db, "users", auth.currentUser.uid),
     });
   }
   hideOverlay(ev);
