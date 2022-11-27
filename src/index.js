@@ -233,7 +233,9 @@ const displayPeople = (data) => {
     dob.setMonth(doc["birth-month"] - 1);
     dob.setDate(doc["birth-day"]);
     return `
-				<li data-id="${doc.id}" class="person ${data.length === 1 ? "selected" : ""}">
+				<li data-ownerid="${doc.owner.id}" data-id="${doc.id}" class="person ${
+      data.length === 1 ? "selected" : ""
+    }">
 				<p class="name">${doc.name}</p>
 				<p class="dob">${dob.toDateString().substring(4, 10)}
 				</p>
