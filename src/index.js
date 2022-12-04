@@ -76,10 +76,12 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
     .addEventListener("click", hideOverlay);
   document.getElementById("btnAddPerson").addEventListener("click", (ev) => {
     personOverlayMode = "new";
+    document.querySelector("#dlgPerson h2").textContent = "Add Person";
     showOverlay(ev);
   });
   document.getElementById("btnAddIdea").addEventListener("click", (ev) => {
     giftOverlayMode = "new";
+    document.querySelector("#dlgIdea h2").textContent = "Add Gift Idea";
     showOverlay(ev);
   });
   document
@@ -106,6 +108,7 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
   document.querySelector(".person-list").addEventListener("click", (e) => {
     if (e.target.localName != "button") return;
     if (e.target.className === "edit-person") {
+      document.querySelector("#dlgPerson h2").textContent = "Edit Person";
       selectPerson(
         people?.find(
           (item) => item.id === e.target.parentElement.getAttribute("data-id")
@@ -140,6 +143,7 @@ document.addEventListener("DOMContentLoaded", async (ev) => {
         });
         break;
       case "button":
+        document.querySelector("#dlgIdea h2").textContent = "Edit Gift Idea";
         currentGift = gifts.find(
           (gift) => gift.id === e.target.parentElement.getAttribute("data-id")
         );
